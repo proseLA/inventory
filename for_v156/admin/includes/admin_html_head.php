@@ -6,6 +6,18 @@
  * @license http://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
  * @version $Id: admin_html_head.php  New in v1.5.7 $
  */
+/*  portions copyright by... zen-cart.com
+
+    developed and brought to you by proseLA
+    https://rossroberts.com
+
+    released under GPU
+    https://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
+
+    06/2020  project: inventory v1.0.0 file: admin_html_head.php
+    modified for use with project and ZC v1.5.6
+*/
+
 if (!defined('IS_ADMIN_FLAG')) {
   die('Illegal Access');
 }
