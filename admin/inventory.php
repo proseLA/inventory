@@ -24,7 +24,7 @@ if ($action == 'tg_stat' && isset($_GET['pid']) && is_numeric($_GET['pid'])) {
 	}
 	$db->Execute("update " . TABLE_PRODUCTS . " set products_status = '" . ($rs_stat->fields['products_status'] == '1' ? '0' : '1') . "' where products_id=" . intval($_GET['pid']) . " LIMIT 1");
 	zen_redirect(zen_href_link(FILENAME_INVENTORY,
-		'cid=' . $_GET['cid'] . '&sort=' . $_GET['sort'] . '&active=' . $_GET['active'], 'SSL'));
+		'cid=' . $_GET['cid'] . '&sort=' . $_GET['sort'] . '&active=' . $_GET['active'] . '&page=' . $_GET['page'], 'SSL'));
 }
 
 $update_qty = 0;
@@ -189,7 +189,7 @@ $categories_products_sort_order_array = array(
                 <div class="row">
                     <div class="configurationColumnLeft">
 						<?= zen_draw_form('qty_update', FILENAME_INVENTORY,
-							"&cid=$cid&sort=" . $_GET['sort'] . "&active=" . $_GET['active'], 'post',
+							"&cid=$cid&sort=" . $_GET['sort'] . "&active=" . $_GET['active'] . '&page=' . $_GET['page'], 'post',
 							'class="form-horizontal"'); ?>
                         <!--form action="" method="post"-->
                         <table class="table table-striped table-hover table-bordered">
@@ -234,7 +234,7 @@ $categories_products_sort_order_array = array(
                                     </td>
                                     <td class="text-center">
                                         <a href="<?= zen_href_link(FILENAME_INVENTORY,
-											'action=tg_stat' . '&pid=' . $prod_list->fields['products_id'] . '&cid=' . $cid . '&sort=' . $_GET['sort'] . '&active=' . $_GET['active'],
+											'action=tg_stat' . '&pid=' . $prod_list->fields['products_id'] . '&cid=' . $cid . '&sort=' . $_GET['sort'] . '&active=' . $_GET['active'] . '&page=' . $_GET['page'],
 											'SSL'); ?>">
 											<?= ($prod_list->fields['products_status']
 												? zen_image(DIR_WS_IMAGES . 'icon_green_on.gif', IMAGE_ICON_STATUS_ON)
