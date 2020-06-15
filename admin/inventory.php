@@ -16,15 +16,12 @@ require('includes/application_top.php');
 require_once(DIR_WS_CLASSES . 'currencies.php');
 $currencies = new currencies();
 
-$cid = [];
-$parent = 0;
+$cid = 0;
 $cid_params = '';
-for ($n = 0; isset($_GET['cid_'.strval($n)]); $n++) {
-	$parent = $cid[$n] = $_GET['cid_'.strval($n)];
-	$cid_params .= '&cid_' . strval($n) .'=' . $parent;
+if (isset($_GET['cid'])) {
+	$cid = $_GET['cid'];
+	$cid_params .= '&cid=' . $cid;
 }
-
-//print_r($cid);
 
 $action = (isset($_GET['action']) ? $_GET['action'] : '');
 
@@ -91,11 +88,9 @@ switch ($active) {
         break;
 }
 
-//$cid = (isset($_GET['cid']) && is_numeric($_GET['cid']) ? $_GET['cid'] : 'all');
-
 $categories = $db->Execute("select c.categories_id, cd.categories_name, c.sort_order "
     . " from " . TABLE_CATEGORIES . " c, " . TABLE_CATEGORIES_DESCRIPTION . " cd "
-    . " where c.categories_id = cd.categories_id and c.parent_id = ". $parent ." and cd.language_id = '" . (int)$_SESSION['languages_id'] . "'"
+    . " where c.categories_id = cd.categories_id and c.parent_id = ". $cid ." and cd.language_id = '" . (int)$_SESSION['languages_id'] . "'"
     . " order by sort_order ");
 
 if ($categories->count() == 0) {
@@ -105,11 +100,13 @@ if ($categories->count() == 0) {
 		. " order by sort_order ");
 }
 
-if ($parent <> 0) {
+if ($cid <> 0) {
     $prod_sql = "select p.products_id, p.products_type, p.products_date_available, p.products_status,p.products_quantity, 
 	p.products_price, p.products_model, pd.products_name,  pc.categories_id, p.product_is_call, p.master_categories_id as catId "
         . " from " . TABLE_PRODUCTS . " p, " . TABLE_PRODUCTS_DESCRIPTION . " pd, ". TABLE_PRODUCTS_TO_CATEGORIES . " pc "
-        . " where p.products_id = pd.products_id and p.products_id = pc.products_id and pc.categories_id = '" . intval($parent) . "' and pd.language_id = '" . (int)$_SESSION['languages_id'] . "'" . $a_field;
+        . " left join " . TABLE_CATEGORIES . " ct on ct.categories_id = pc.categories_id"
+        . " where p.products_id = pd.products_id and p.products_id = pc.products_id and pd.language_id = '" . (int)$_SESSION['languages_id'] . "'"
+        . " and (pc.categories_id = " . intval($cid) . " or ct.parent_id = " . intval($cid) . ")" . $a_field;
 } else {
     $prod_sql = "select p.products_id, p.products_type, p.products_date_available, p.products_status,p.products_quantity, 
 	p.products_price, p.products_model, pd.products_name, p.product_is_call, p.master_categories_id as catId "
@@ -159,38 +156,38 @@ $categories_products_sort_order_array = array(
 <!-- body //-->
 <div class="container-fluid" id="pageWrapper">
     <div class="col-md-11 alert-box alert alert-info">
-        <h2>Inventory Maintenance</h2>
+        <h3>Inventory Maintenance</h3>
 		<?php
-		$parent_name = zen_get_category_name($parent, (int)$_SESSION['languages_id']);
-		if ($parent > 0) {
+		$parent_name = zen_get_category_name($cid, (int)$_SESSION['languages_id']);
+		if ($cid > 0) {
 			?>
-            <h2><?= $parent_name; ?></h2>
+            <h3><?= $parent_name; ?></h3>
 		<?php } ?>
     </div>
     <div class="col-md-11">
 		<?php if (isset($update_qty) && $update_qty > 0) { ?>
             <div class="center alert-box alert alert-info">
-                <h2><?= $update_qty . PRODUCTS_UPDATED; ?></h2>
+                <h3><?= $update_qty . PRODUCTS_UPDATED; ?></h3>
             </div>
 		<?php } ?>
 
         <div>
-            <?= zen_draw_form('selection', FILENAME_INVENTORY, 'cid_0=' . $parent, 'get', 'class="form-horizontal"'); ?>
+            <?= zen_draw_form('selection', FILENAME_INVENTORY, 'cid=' . $cid, 'get', 'class="form-horizontal"'); ?>
 
-            <?= zen_draw_label('Category:', 'cid_0', 'class="col-sm-6 col-md-4 control-label"'); ?>
+            <?= zen_draw_label('Category:', 'cid', 'class="col-sm-6 col-md-4 control-label"'); ?>
             <div class="col-sm-6 col-md-8">
-                <select id="cid_0" name="cid_0" onChange="this.form.submit()" class="form-control">
+                <select id="cid" name="cid" onChange="this.form.submit()" class="form-control">
                     <?php
-                    if ($parent !== 0) {
+                    if ($cid !== 0) {
                         ?>
-                        <option value="<?= $parent; ?>" selected><?= $parent_name; ?>
+                        <option value="<?= $cid; ?>" selected><?= $parent_name; ?>
                     <?php
                     }
                     ?>
-                    <option value="0" <?= ($parent == 0 ? 'SELECTED' : ''); ?>>All Categories
+                    <option value="0" <?= ($cid == 0 ? 'SELECTED' : ''); ?>>All Categories
                         <?php
                         while ($categories && !$categories->EOF) {
-                            echo "\n<option value=" . $categories->fields['categories_id'] . ($categories->fields['categories_id'] == $parent ? ' SELECTED ' : '') . " >" . strip_tags($categories->fields['categories_name']);
+                            echo "\n<option value=" . $categories->fields['categories_id'] . ($categories->fields['categories_id'] == $cid ? ' SELECTED ' : '') . " >" . strip_tags($categories->fields['categories_name']);
                             $categories->MoveNext();
                         }
                         ?>
@@ -214,7 +211,7 @@ $categories_products_sort_order_array = array(
 
             <div class="row">
                 <div class="configurationColumnLeft">
-                    <!--form action="" method="post"-->
+                    <form action="" method="post">
                         <table class="table table-striped table-hover table-bordered">
                             <thead>
 
@@ -287,7 +284,7 @@ $categories_products_sort_order_array = array(
     	<input type="submit" name="update_" value="update quantities" class="btn btn-primary"/>
       </span>
                         </div>
-                    <!--/form-->
+                    </form>
 
                 </div>
 
