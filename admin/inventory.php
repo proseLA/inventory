@@ -7,7 +7,7 @@
     released under GPU
     https://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
 
-    06/2020  project: inventory v1.1.0 file: inventory.php
+    06/2020  project: inventory v1.1.1 file: inventory.php
 */
 
 require('includes/application_top.php');
@@ -178,22 +178,9 @@ $categories_products_sort_order_array = array(
 
 				<?= zen_draw_label('Category:', 'cid', 'class="col-sm-6 col-md-4 control-label"'); ?>
                 <div class="col-sm-6 col-md-8">
-                    <select id="cid" name="cid" onChange="this.form.submit()" class="form-control">
-						<?php
-						if ($cid !== 0) {
-						?>
-                        <option value="<?= $cid; ?>" selected><?= $parent_name; ?>
-							<?php
-							}
-							?>
-                        <option value="0" <?= ($cid == 0 ? 'SELECTED' : ''); ?>>All Categories
-							<?php
-							while ($categories && !$categories->EOF) {
-								echo "\n<option value=" . $categories->fields['categories_id'] . ($categories->fields['categories_id'] == $cid ? ' SELECTED ' : '') . " >" . strip_tags($categories->fields['categories_name']);
-								$categories->MoveNext();
-							}
-							?>
-                    </select>&nbsp;
+                    <?php
+                    echo zen_draw_pull_down_menu('cid', zen_get_category_tree(), $cid, 'onChange="this.form.submit()" class="form-control"');
+                    ?>
                 </div>
 				<?= zen_draw_label(TEXT_CATEGORIES_PRODUCTS_SORT_ORDER_INFO, 'sort',
 					'class="col-sm-6 col-md-4 control-label"'); ?>
