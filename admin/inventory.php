@@ -7,7 +7,7 @@
     released under GPU
     https://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
 
-    06/2020  project: inventory v1.1.1 file: inventory.php
+    06/2020  project: inventory v1.2.0 file: inventory.php
 */
 
 require('includes/application_top.php');
@@ -26,9 +26,6 @@ $action = (isset($_GET['action']) ? $_GET['action'] : '');
 
 if ($action == 'tg_stat' && isset($_GET['pid']) && is_numeric($_GET['pid'])) {
 	$rs_stat = $db->Execute("select products_status from " . TABLE_PRODUCTS . " where products_id=" . intval($_GET['pid']) . " LIMIT 1");
-	if ($rs_stat->fields['products_status'] == '1') {
-		// $db->Execute("update " . TABLE_PRODUCTS . " set products_quantity = 0 where products_id=".intval($_GET['pid'])." LIMIT 1");
-	}
 	$db->Execute("update " . TABLE_PRODUCTS . " set products_status = '" . ($rs_stat->fields['products_status'] == '1' ? '0' : '1') . "' where products_id=" . intval($_GET['pid']) . " LIMIT 1");
 	zen_redirect(zen_href_link(FILENAME_INVENTORY, 'sort=' . $_GET['sort'] . '&active=' . $_GET['active'] . $cid_params,
 		'SSL'));
@@ -42,13 +39,33 @@ if (isset($_POST['update_']) && is_array($_POST['new_qty']) && is_array($_POST['
 		if (array_key_exists($item, $old_qty) && $old_qty[$item] !== $qty) {
 			if (is_numeric($qty) and is_numeric($item)) {
 				$db->Execute("update " . TABLE_PRODUCTS . " set products_quantity = '" . intval($qty) . "' where products_id = '" . intval($item) . "' and products_quantity = '" . intval($old_qty[$item]) . "' limit 1");
-				$update_qty++;
+				if (mysqli_affected_rows($db->link) == 1) {
+					$update_qty++;
+				}
 			}
 		} else {
 			//echo "old: $old_qty[$item] , new: $qty <br />";
 		}
 	}
 }
+
+	$updated_count_price = 0;
+
+	if (isset($_POST['update_']) && is_array($_POST['new_price']) && is_array($_POST['old_price'])) {
+		$old_price = $_POST['old_price'];
+		foreach ($_POST['new_price'] as $item => $price) {
+			if (array_key_exists($item, $old_price) && $old_price[$item] !== $price) {
+				if (is_numeric($price) and is_numeric($item)) {
+					$temp = $db->Execute("update " . TABLE_PRODUCTS . " set products_price = '" . convertToFloat($price) . "' where products_id = '" . intval($item) . "' and products_price = '" . (float)($old_price[$item]) . "' limit 1");
+					if (mysqli_affected_rows($db->link) == 1) {
+						$updated_count_price++;
+                    }
+				}
+			} else {
+				//echo "old: $old_qty[$item] , new: $qty <br />";
+			}
+		}
+	}
 
 $sort = (isset($_GET['sort']) ? $_GET['sort'] : '0');
 $order_by = " ";
@@ -158,7 +175,7 @@ $categories_products_sort_order_array = array(
     <!-- body //-->
     <div class="container-fluid" id="pageWrapper">
         <div class="col-md-11 alert-box alert alert-info">
-            <h3>Inventory Maintenance</h3>
+            <h3><?= INVENTORY_PAGE; ?></h3>
 			<?php
 			$parent_name = zen_get_category_name($cid, (int)$_SESSION['languages_id']);
 			if ($cid > 0) {
@@ -168,15 +185,27 @@ $categories_products_sort_order_array = array(
         </div>
         <div class="col-md-11">
 			<?php if (isset($update_qty) && $update_qty > 0) { ?>
-                <div class="center alert-box alert alert-info">
-                    <h3><?= $update_qty . PRODUCTS_UPDATED; ?></h3>
+                <div class="alert alert-success fade in alert-dismissible show">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="center"><?= $update_qty . PRODUCTS_UPDATED; ?></h4>
                 </div>
 			<?php } ?>
+
+	        <?php if (isset($updated_count_price) && $updated_count_price > 0) { ?>
+                <div class="alert alert-success fade in alert-dismissible show">
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                    <h4 class="center"><?= $updated_count_price . PRODUCTS_PRICE_UPDATED; ?></h4>
+                </div>
+	        <?php } ?>
 
             <div>
 				<?= zen_draw_form('selection', FILENAME_INVENTORY, 'cid=' . $cid, 'get', 'class="form-horizontal"'); ?>
 
-				<?= zen_draw_label('Category:', 'cid', 'class="col-sm-6 col-md-4 control-label"'); ?>
+				<?= zen_draw_label(CATEGORY_SELECTOR, 'cid', 'class="col-sm-6 col-md-4 control-label"'); ?>
                 <div class="col-sm-6 col-md-8">
                     <?php
                     echo zen_draw_pull_down_menu('cid', zen_get_category_tree(), $cid, 'onChange="this.form.submit()" class="form-control"');
@@ -188,7 +217,7 @@ $categories_products_sort_order_array = array(
 					<?= zen_draw_pull_down_menu('sort', $categories_products_sort_order_array, $sort,
 						'onchange="this.form.submit();" class="form-control" id="sort"'); ?>
                 </div>
-				<?= zen_draw_label('Active/Inactive:', 'active', 'class="col-sm-6 col-md-4 control-label"'); ?>
+				<?= zen_draw_label(ACTIVE_STATUS, 'active', 'class="col-sm-6 col-md-4 control-label"'); ?>
                 <div class="col-sm-6 col-md-8">
                     <select id="active" name="active" onChange="this.form.submit()" class="form-control">
                         <option value="0" <?= ($active == '0' ? 'SELECTED' : ''); ?>>Only Active
@@ -207,7 +236,7 @@ $categories_products_sort_order_array = array(
                                 <thead>
 
                                 <tr>
-                                    <td colspan="6" class="text-right"><?= $pager; ?></td>
+                                    <td colspan="7" class="text-right"><?= $pager; ?></td>
                                 </tr>
 
                                 <tr class="dataTableHeadingRow">
@@ -216,7 +245,8 @@ $categories_products_sort_order_array = array(
                                     <th class="dataTableHeadingContent"><?= TABLE_HEADING_NAME; ?></th>
                                     <th class="dataTableHeadingContent text-center"><?= TABLE_HEADING_STATUS; ?></th>
                                     <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_QTY; ?></th>
-                                    <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_PRICE; ?></th>
+                                    <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_BASE_PRICE; ?></th>
+                                    <th class="dataTableHeadingContent text-right"><?= TABLE_HEADING_DISPLAY_PRICE; ?></th>
                                 </tr>
                                 </thead>
 
@@ -265,6 +295,15 @@ $categories_products_sort_order_array = array(
                                                    name="old_qty[<?= $prod_list->fields['products_id']; ?>]"
                                                    value="<?= $prod_list->fields['products_quantity']; ?>"/>
                                         </td>
+
+                                        <td class="dataTableContent text-right">
+                                            <input type="text"
+                                                   name="new_price[<?= $prod_list->fields['products_id']; ?>]"
+                                                   value="<?= $prod_list->fields['products_price']; ?>" size="7"/>
+                                            <input type="hidden"
+                                                   name="old_price[<?= $prod_list->fields['products_id']; ?>]"
+                                                   value="<?= $prod_list->fields['products_price']; ?>"/>
+                                        </td>
                                         <td class="dataTableContent text-right">
                                             &nbsp;<?= zen_get_products_display_price((int)$prod_list->fields['products_id']); ?></td>
                                     </tr>
@@ -273,13 +312,13 @@ $categories_products_sort_order_array = array(
 								}
 								?>
                                 <tr>
-                                    <td colspan="6" class="text-right"><?= $pager; ?></td>
+                                    <td colspan="7" class="text-right"><?= $pager; ?></td>
                                 </tr>
                             </table>
                             <div>
       <span class="floatButton text-right">
     	<input type="reset" value="reset" class="btn btn-danger"/>
-    	<input type="submit" name="update_" value="update quantities" class="btn btn-primary"/>
+    	<input type="submit" name="update_" value="<?= BUTTON_UPDATE; ?>" class="btn btn-primary"/>
       </span>
                             </div>
                         </form>

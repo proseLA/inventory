@@ -11,6 +11,6 @@
 */
 
 if (!defined('IS_ADMIN_FLAG')) {
-	die('Illegal Access');
+  die('Illegal Access');
 }
-define('FILENAME_INVENTORY', 'inventory.php');
+  define('FILENAME_INVENTORY', 'inventory.php');
