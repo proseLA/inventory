@@ -1,53 +1,53 @@
 <?php
-/*  portions copyright by... zen-cart.com
+	/*  portions copyright by... zen-cart.com
 
-    developed and brought to you by proseLA
-    https://rossroberts.com
+		developed and brought to you by proseLA
+		https://rossroberts.com
 
-    released under GPU
-    https://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
+		released under GPU
+		https://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
 
-    06/2020  project: inventory v1.2.0 file: inventory.php
-*/
+		06/2020  project: inventory v1.2.0 file: inventory.php
+	*/
 
-require('includes/application_top.php');
+	require('includes/application_top.php');
 
-require_once(DIR_WS_CLASSES . 'currencies.php');
-$currencies = new currencies();
+	require_once(DIR_WS_CLASSES . 'currencies.php');
+	$currencies = new currencies();
 
-$cid = 0;
-$cid_params = '';
-if (isset($_GET['cid'])) {
-	$cid = $_GET['cid'];
-	$cid_params .= '&cid=' . $cid;
-}
+	$cid = 0;
+	$cid_params = '';
+	if (isset($_GET['cid'])) {
+		$cid = $_GET['cid'];
+		$cid_params .= '&cid=' . $cid;
+	}
 
-$action = (isset($_GET['action']) ? $_GET['action'] : '');
+	$action = (isset($_GET['action']) ? $_GET['action'] : '');
 
-if ($action == 'tg_stat' && isset($_GET['pid']) && is_numeric($_GET['pid'])) {
-	$rs_stat = $db->Execute("select products_status from " . TABLE_PRODUCTS . " where products_id=" . intval($_GET['pid']) . " LIMIT 1");
-	$db->Execute("update " . TABLE_PRODUCTS . " set products_status = '" . ($rs_stat->fields['products_status'] == '1' ? '0' : '1') . "' where products_id=" . intval($_GET['pid']) . " LIMIT 1");
-	zen_redirect(zen_href_link(FILENAME_INVENTORY, 'sort=' . $_GET['sort'] . '&active=' . $_GET['active'] . $cid_params,
-		'SSL'));
-}
+	if ($action == 'tg_stat' && isset($_GET['pid']) && is_numeric($_GET['pid'])) {
+		$rs_stat = $db->Execute("select products_status from " . TABLE_PRODUCTS . " where products_id=" . intval($_GET['pid']) . " LIMIT 1");
+		$db->Execute("update " . TABLE_PRODUCTS . " set products_status = '" . ($rs_stat->fields['products_status'] == '1' ? '0' : '1') . "' where products_id=" . intval($_GET['pid']) . " LIMIT 1");
+		zen_redirect(zen_href_link(FILENAME_INVENTORY, 'sort=' . $_GET['sort'] . '&active=' . $_GET['active'] . $cid_params,
+			'SSL'));
+	}
 
-$update_qty = 0;
+	$update_qty = 0;
 
-if (isset($_POST['update_']) && is_array($_POST['new_qty']) && is_array($_POST['old_qty'])) {
-	$old_qty = $_POST['old_qty'];
-	foreach ($_POST['new_qty'] as $item => $qty) {
-		if (array_key_exists($item, $old_qty) && $old_qty[$item] !== $qty) {
-			if (is_numeric($qty) and is_numeric($item)) {
-				$db->Execute("update " . TABLE_PRODUCTS . " set products_quantity = '" . intval($qty) . "' where products_id = '" . intval($item) . "' and products_quantity = '" . intval($old_qty[$item]) . "' limit 1");
-				if (mysqli_affected_rows($db->link) == 1) {
-					$update_qty++;
+	if (isset($_POST['update_']) && is_array($_POST['new_qty']) && is_array($_POST['old_qty'])) {
+		$old_qty = $_POST['old_qty'];
+		foreach ($_POST['new_qty'] as $item => $qty) {
+			if (array_key_exists($item, $old_qty) && $old_qty[$item] !== $qty) {
+				if (is_numeric($qty) and is_numeric($item)) {
+					$db->Execute("update " . TABLE_PRODUCTS . " set products_quantity = '" . intval($qty) . "' where products_id = '" . intval($item) . "' and products_quantity = '" . intval($old_qty[$item]) . "' limit 1");
+					if (mysqli_affected_rows($db->link) == 1) {
+						$update_qty++;
+					}
 				}
+			} else {
+				//echo "old: $old_qty[$item] , new: $qty <br />";
 			}
-		} else {
-			//echo "old: $old_qty[$item] , new: $qty <br />";
 		}
 	}
-}
 
 	$updated_count_price = 0;
 
@@ -59,7 +59,7 @@ if (isset($_POST['update_']) && is_array($_POST['new_qty']) && is_array($_POST['
 					$temp = $db->Execute("update " . TABLE_PRODUCTS . " set products_price = '" . convertToFloat($price) . "' where products_id = '" . intval($item) . "' and products_price = '" . (float)($old_price[$item]) . "' limit 1");
 					if (mysqli_affected_rows($db->link) == 1) {
 						$updated_count_price++;
-                    }
+					}
 				}
 			} else {
 				//echo "old: $old_qty[$item] , new: $qty <br />";
@@ -67,99 +67,99 @@ if (isset($_POST['update_']) && is_array($_POST['new_qty']) && is_array($_POST['
 		}
 	}
 
-$sort = (isset($_GET['sort']) ? $_GET['sort'] : '0');
-$order_by = " ";
-switch ($_GET['sort']) {
-	case (0):
-		$order_by = " ORDER BY p.products_sort_order, pd.products_name";
-		break;
-	case (1):
-		$order_by = " ORDER BY pd.products_name";
-		break;
-	case (2);
-		$order_by = " ORDER BY p.products_model";
-		break;
-	case (3);
-		$order_by = " ORDER BY p.products_quantity, pd.products_name";
-		break;
-	case (4);
-		$order_by = " ORDER BY p.products_quantity DESC, pd.products_name";
-		break;
-	case (5);
-		$order_by = " ORDER BY p.products_price_sorter, pd.products_name";
-		break;
-	case (6);
-		$order_by = " ORDER BY p.products_price_sorter DESC, pd.products_name";
-		break;
-}
-$active = (isset($_GET['active']) ? $_GET['active'] : '0');
-$a_field = '';
-switch ($active) {
-	case '1':
-		$a_field = '';
-		break;
+	$sort = (isset($_GET['sort']) ? $_GET['sort'] : '0');
+	$order_by = " ";
+	switch ($_GET['sort']) {
+		case (0):
+			$order_by = " ORDER BY p.products_sort_order, pd.products_name";
+			break;
+		case (1):
+			$order_by = " ORDER BY pd.products_name";
+			break;
+		case (2);
+			$order_by = " ORDER BY p.products_model";
+			break;
+		case (3);
+			$order_by = " ORDER BY p.products_quantity, pd.products_name";
+			break;
+		case (4);
+			$order_by = " ORDER BY p.products_quantity DESC, pd.products_name";
+			break;
+		case (5);
+			$order_by = " ORDER BY p.products_price_sorter, pd.products_name";
+			break;
+		case (6);
+			$order_by = " ORDER BY p.products_price_sorter DESC, pd.products_name";
+			break;
+	}
+	$active = (isset($_GET['active']) ? $_GET['active'] : '0');
+	$a_field = '';
+	switch ($active) {
+		case '1':
+			$a_field = '';
+			break;
 
-	case '0':
-	default:
-		$a_field = ' and p.products_status > 0';
-		break;
-}
+		case '0':
+		default:
+			$a_field = ' and p.products_status > 0';
+			break;
+	}
 
-$categories = $db->Execute("select c.categories_id, cd.categories_name, c.sort_order "
-	. " from " . TABLE_CATEGORIES . " c, " . TABLE_CATEGORIES_DESCRIPTION . " cd "
-	. " where c.categories_id = cd.categories_id and c.parent_id = " . $cid . " and cd.language_id = '" . (int)$_SESSION['languages_id'] . "'"
-	. " order by sort_order ");
-
-if ($categories->count() == 0) {
 	$categories = $db->Execute("select c.categories_id, cd.categories_name, c.sort_order "
 		. " from " . TABLE_CATEGORIES . " c, " . TABLE_CATEGORIES_DESCRIPTION . " cd "
-		. " where c.categories_id = cd.categories_id and c.parent_id = 0 and cd.language_id = '" . (int)$_SESSION['languages_id'] . "'"
+		. " where c.categories_id = cd.categories_id and c.parent_id = " . $cid . " and cd.language_id = '" . (int)$_SESSION['languages_id'] . "'"
 		. " order by sort_order ");
-}
 
-if ($cid <> 0) {
-	$prod_sql = "select p.products_id, p.products_type, p.products_date_available, p.products_status,p.products_quantity, 
-	p.products_price, p.products_model, pd.products_name,  pc.categories_id, p.product_is_call, p.master_categories_id as catId "
-		. " from " . TABLE_PRODUCTS . " p, " . TABLE_PRODUCTS_DESCRIPTION . " pd, " . TABLE_PRODUCTS_TO_CATEGORIES . " pc "
-		. " left join " . TABLE_CATEGORIES . " ct on ct.categories_id = pc.categories_id"
-		. " where p.products_id = pd.products_id and p.products_id = pc.products_id and pd.language_id = '" . (int)$_SESSION['languages_id'] . "'"
-		. " and (pc.categories_id = " . intval($cid) . " or ct.parent_id = " . intval($cid) . ")" . $a_field;
-} else {
-	$prod_sql = "select p.products_id, p.products_type, p.products_date_available, p.products_status,p.products_quantity, 
-	p.products_price, p.products_model, pd.products_name, p.product_is_call, p.master_categories_id as catId "
-		. " from " . TABLE_PRODUCTS . " p, " . TABLE_PRODUCTS_DESCRIPTION . " pd  "
-		. " where p.products_id = pd.products_id and pd.language_id = '" . (int)$_SESSION['languages_id'] . "'" . $a_field;
-}
-
-$prod_sql .= $order_by;
-
-$query_num_rows = 0;
-$page = intval((isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1));
-$products_page = new splitPageResults($page, MAX_DISPLAY_RESULTS_CATEGORIES, $prod_sql, $query_num_rows);
-$prod_list = $db->Execute($prod_sql);
-
-$query_string = '';
-foreach ($_GET as $k => $v) {
-	if ($k != 'page') {
-		$query_string .= $k . '=' . $v . '&';
+	if ($categories->count() == 0) {
+		$categories = $db->Execute("select c.categories_id, cd.categories_name, c.sort_order "
+			. " from " . TABLE_CATEGORIES . " c, " . TABLE_CATEGORIES_DESCRIPTION . " cd "
+			. " where c.categories_id = cd.categories_id and c.parent_id = 0 and cd.language_id = '" . (int)$_SESSION['languages_id'] . "'"
+			. " order by sort_order ");
 	}
-}
 
-$pager = $products_page->display_count($query_num_rows, MAX_DISPLAY_RESULTS_CATEGORIES, $page,
-	TEXT_DISPLAY_NUMBER_OF_PRODUCTS);
-$pager .= '&nbsp;-&nbsp;';
-$pager .= $products_page->display_links($query_num_rows, MAX_DISPLAY_RESULTS_CATEGORIES, MAX_DISPLAY_PAGE_LINKS, $page,
-	$query_string);
+	if ($cid <> 0) {
+		$prod_sql = "select p.products_id, p.products_type, p.products_date_available, p.products_status,p.products_quantity, 
+	p.products_price, p.products_model, pd.products_name,  pc.categories_id, p.product_is_call, p.master_categories_id as catId "
+			. " from " . TABLE_PRODUCTS . " p, " . TABLE_PRODUCTS_DESCRIPTION . " pd, " . TABLE_PRODUCTS_TO_CATEGORIES . " pc "
+			. " left join " . TABLE_CATEGORIES . " ct on ct.categories_id = pc.categories_id"
+			. " where p.products_id = pd.products_id and p.products_id = pc.products_id and pd.language_id = '" . (int)$_SESSION['languages_id'] . "'"
+			. " and (pc.categories_id = " . intval($cid) . " or ct.parent_id = " . intval($cid) . ")" . $a_field;
+	} else {
+		$prod_sql = "select p.products_id, p.products_type, p.products_date_available, p.products_status,p.products_quantity, 
+	p.products_price, p.products_model, pd.products_name, p.product_is_call, p.master_categories_id as catId "
+			. " from " . TABLE_PRODUCTS . " p, " . TABLE_PRODUCTS_DESCRIPTION . " pd  "
+			. " where p.products_id = pd.products_id and pd.language_id = '" . (int)$_SESSION['languages_id'] . "'" . $a_field;
+	}
 
-$categories_products_sort_order_array = array(
-	array('id' => '0', 'text' => TEXT_SORT_PRODUCTS_SORT_ORDER_PRODUCTS_NAME),
-	array('id' => '1', 'text' => TEXT_SORT_PRODUCTS_NAME),
-	array('id' => '2', 'text' => TEXT_SORT_PRODUCTS_MODEL),
-	array('id' => '3', 'text' => TEXT_SORT_PRODUCTS_QUANTITY),
-	array('id' => '4', 'text' => TEXT_SORT_PRODUCTS_QUANTITY_DESC),
-	array('id' => '5', 'text' => TEXT_SORT_PRODUCTS_PRICE),
-	array('id' => '6', 'text' => TEXT_SORT_PRODUCTS_PRICE_DESC)
-);
+	$prod_sql .= $order_by;
+
+	$query_num_rows = 0;
+	$page = intval((isset($_GET['page']) && is_numeric($_GET['page']) ? $_GET['page'] : 1));
+	$products_page = new splitPageResults($page, MAX_DISPLAY_RESULTS_CATEGORIES, $prod_sql, $query_num_rows);
+	$prod_list = $db->Execute($prod_sql);
+
+	$query_string = '';
+	foreach ($_GET as $k => $v) {
+		if ($k != 'page') {
+			$query_string .= $k . '=' . $v . '&';
+		}
+	}
+
+	$pager = $products_page->display_count($query_num_rows, MAX_DISPLAY_RESULTS_CATEGORIES, $page,
+		TEXT_DISPLAY_NUMBER_OF_PRODUCTS);
+	$pager .= '&nbsp;-&nbsp;';
+	$pager .= $products_page->display_links($query_num_rows, MAX_DISPLAY_RESULTS_CATEGORIES, MAX_DISPLAY_PAGE_LINKS, $page,
+		$query_string);
+
+	$categories_products_sort_order_array = array(
+		array('id' => '0', 'text' => TEXT_SORT_PRODUCTS_SORT_ORDER_PRODUCTS_NAME),
+		array('id' => '1', 'text' => TEXT_SORT_PRODUCTS_NAME),
+		array('id' => '2', 'text' => TEXT_SORT_PRODUCTS_MODEL),
+		array('id' => '3', 'text' => TEXT_SORT_PRODUCTS_QUANTITY),
+		array('id' => '4', 'text' => TEXT_SORT_PRODUCTS_QUANTITY_DESC),
+		array('id' => '5', 'text' => TEXT_SORT_PRODUCTS_PRICE),
+		array('id' => '6', 'text' => TEXT_SORT_PRODUCTS_PRICE_DESC)
+	);
 ?>
     <!doctype html>
     <html <?= HTML_PARAMS; ?>>
@@ -177,11 +177,11 @@ $categories_products_sort_order_array = array(
         <div class="col-md-11 alert-box alert alert-info">
             <h3><?= INVENTORY_PAGE; ?></h3>
 			<?php
-			$parent_name = zen_get_category_name($cid, (int)$_SESSION['languages_id']);
-			if ($cid > 0) {
-				?>
-                <h3><?= $parent_name; ?></h3>
-			<?php } ?>
+				$parent_name = zen_get_category_name($cid, (int)$_SESSION['languages_id']);
+				if ($cid > 0) {
+					?>
+                    <h3><?= $parent_name; ?></h3>
+				<?php } ?>
         </div>
         <div class="col-md-11">
 			<?php if (isset($update_qty) && $update_qty > 0) { ?>
@@ -193,23 +193,23 @@ $categories_products_sort_order_array = array(
                 </div>
 			<?php } ?>
 
-	        <?php if (isset($updated_count_price) && $updated_count_price > 0) { ?>
+			<?php if (isset($updated_count_price) && $updated_count_price > 0) { ?>
                 <div class="alert alert-success fade in alert-dismissible show">
                     <button type="button" class="close" data-dismiss="alert" aria-label="Close">
                         <span aria-hidden="true">&times;</span>
                     </button>
                     <h4 class="center"><?= $updated_count_price . PRODUCTS_PRICE_UPDATED; ?></h4>
                 </div>
-	        <?php } ?>
+			<?php } ?>
 
             <div>
 				<?= zen_draw_form('selection', FILENAME_INVENTORY, 'cid=' . $cid, 'get', 'class="form-horizontal"'); ?>
 
 				<?= zen_draw_label(CATEGORY_SELECTOR, 'cid', 'class="col-sm-6 col-md-4 control-label"'); ?>
                 <div class="col-sm-6 col-md-8">
-                    <?php
-                    echo zen_draw_pull_down_menu('cid', zen_get_category_tree(), $cid, 'onChange="this.form.submit()" class="form-control"');
-                    ?>
+					<?php
+						echo zen_draw_pull_down_menu('cid', zen_get_category_tree(), $cid, 'onChange="this.form.submit()" class="form-control"');
+					?>
                 </div>
 				<?= zen_draw_label(TEXT_CATEGORIES_PRODUCTS_SORT_ORDER_INFO, 'sort',
 					'class="col-sm-6 col-md-4 control-label"'); ?>
@@ -272,7 +272,7 @@ $categories_products_sort_order_array = array(
                                             onclick="document.location.href='<?= zen_href_link(FILENAME_PRODUCT,
 											    'product_type=' . $prod_list->fields['products_type'] . '&pID=' . $prod_list->fields['products_id'] . '&cPath=' . $prod_list->fields['catId'] . '&action=new_product'); ?> '">
 											<?php
-											echo zen_get_products_name($prod_list->fields['products_id']);
+												echo zen_get_products_name($prod_list->fields['products_id']);
 											?>
                                         </td>
                                         <td class="text-center">
