@@ -7,10 +7,10 @@
 		released under GPU
 		https://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
 
-		06/2020  project: inventory v1.2.0 file: inventory.php
+		06/2020  project: inventory v1.2.1 file: inventory.php
 	*/
 
 	if (!defined('IS_ADMIN_FLAG')) {
 		die('Illegal Access');
 	}
-	define('FILENAME_INVENTORY', 'inventory.php');
+	define('FILENAME_INVENTORY', 'inventory');
