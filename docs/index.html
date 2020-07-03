@@ -71,8 +71,8 @@
         <div class="container">
             <div class="row">
                 <div class="col-md-8 col-md-offset-2">
-                    <h2 class="brand-heading">inventory quantity update on a single admin page</h1>
-                    <h3 class="brand-title"></h3>
+                    <h3 class="brand-heading">inventory quantity update (and base price!) on a single admin page</h3>
+                    <!--h3 class="brand-title"></h3-->
                     <p class="intro-text"></p>
                     <a href="#install" class="btn btn-circle page-scroll">
                         <i class="fa fa-angle-double-down animated"></i>
@@ -96,8 +96,6 @@
         <li>If you are upgrading from a previous version, you can just copy the files on top of the previous files.</li>
         <li>If you need help with FTPing the files up to your server, or an FTP client, go to the zen-cart forum.</li>
     </div>
-
-
 </section>
 <!-- Download Section -->
 <section id="notes" class="container content-section ">
@@ -108,7 +106,7 @@
         </li>
         <li>There are no additional fields added to any zen-cart tables</li>
         <li>The extra file for v156 installs is NOT the same as the v157 available on github.  There is a slight difference due to changes between the 2 versions of ZC.</li>
-        <li>Update multiple items inventory quantity field within a category from a single page.</li>
+        <li>Update multiple items inventory quantity and base price fields within a category from a single page.</li>
         <li>One can change the items status by clicking on the status icon; green go red (inactive) and vice versa.</li>
         <li>Clicking on the item name will bring you directly to the item maintenance page.</li>
         <li>No TESTING has been done with any other plug-ins; ie stock by attributes.  If there is a demand, perhaps i will look at incorporating.</li>
@@ -129,6 +127,11 @@
             <li>Display on Menu -> check the box</li>
             <li>Sort Order -> Pick a number!</li>
         </ul></li>
+        <br>
+        <H2>Notes on v1.2.0</H2>
+        <li>Additional constants added to make it more multi-language friendly.</li>
+        <li>Products base price is now incorporated as part of the updator.</li>
+        <li>Number of items updated for each field is now more accurate.  If update fails (for whatever reason), that fields quantity will not get added.</li>
     </div>
 </section>
 <!-- Contact Section -->
