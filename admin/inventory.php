@@ -39,7 +39,7 @@
 			if (array_key_exists($item, $old_qty) && $old_qty[$item] !== $qty) {
 				if (is_numeric($qty) and is_numeric($item)) {
 					$db->Execute("update " . TABLE_PRODUCTS . " set products_quantity = '" . intval($qty) . "' where products_id = '" . intval($item) . "' and products_quantity = '" . intval($old_qty[$item]) . "' limit 1");
-					if (mysqli_affected_rows($db->link) == 1) {
+					if ($db->affectedRows() > 0) {
 						$update_qty++;
 					}
 				}
@@ -56,8 +56,8 @@
 		foreach ($_POST['new_price'] as $item => $price) {
 			if (array_key_exists($item, $old_price) && $old_price[$item] !== $price) {
 				if (is_numeric($price) and is_numeric($item)) {
-					$temp = $db->Execute("update " . TABLE_PRODUCTS . " set products_price = '" . convertToFloat($price) . "' where products_id = '" . intval($item) . "' and products_price = '" . (float)($old_price[$item]) . "' limit 1");
-					if (mysqli_affected_rows($db->link) == 1) {
+					$db->Execute("update " . TABLE_PRODUCTS . " set products_price = '" . convertToFloat($price) . "' where products_id = '" . intval($item) . "' and products_price = '" . (float)($old_price[$item]) . "' limit 1");
+					if ($db->affectedRows() > 0) {
 						$updated_count_price++;
 					}
 				}
