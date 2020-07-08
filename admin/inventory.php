@@ -7,7 +7,7 @@
 		released under GPU
 		https://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
 
-		06/2020  project: inventory v1.2.0 file: inventory.php
+		06/2020  project: inventory v1.2.2 file: inventory.php
 	*/
 
 	require('includes/application_top.php');
@@ -22,12 +22,14 @@
 		$cid_params .= '&cid=' . $cid;
 	}
 
-	$action = (isset($_GET['action']) ? $_GET['action'] : '');
+	$action = isset($_GET['action']) ? $_GET['action'] : '';
+	$sort =  isset($_GET['sort']) ? $_GET['sort'] : '0';
+	$active = isset($_GET['active']) ? $_GET['active'] : '0';
 
 	if ($action == 'tg_stat' && isset($_GET['pid']) && is_numeric($_GET['pid'])) {
 		$rs_stat = $db->Execute("select products_status from " . TABLE_PRODUCTS . " where products_id=" . intval($_GET['pid']) . " LIMIT 1");
 		$db->Execute("update " . TABLE_PRODUCTS . " set products_status = '" . ($rs_stat->fields['products_status'] == '1' ? '0' : '1') . "' where products_id=" . intval($_GET['pid']) . " LIMIT 1");
-		zen_redirect(zen_href_link(FILENAME_INVENTORY, 'sort=' . $_GET['sort'] . '&active=' . $_GET['active'] . $cid_params,
+		zen_redirect(zen_href_link(FILENAME_INVENTORY, 'sort=' . $sort . '&active=' . $active . $cid_params,
 			'SSL'));
 	}
 
@@ -39,7 +41,7 @@
 			if (array_key_exists($item, $old_qty) && $old_qty[$item] !== $qty) {
 				if (is_numeric($qty) and is_numeric($item)) {
 					$db->Execute("update " . TABLE_PRODUCTS . " set products_quantity = '" . intval($qty) . "' where products_id = '" . intval($item) . "' and products_quantity = '" . intval($old_qty[$item]) . "' limit 1");
-					if ($db->affectedRows() > 0) {
+					if ($db->affectedRows() == 1) {
 						$update_qty++;
 					}
 				}
@@ -57,7 +59,7 @@
 			if (array_key_exists($item, $old_price) && $old_price[$item] !== $price) {
 				if (is_numeric($price) and is_numeric($item)) {
 					$db->Execute("update " . TABLE_PRODUCTS . " set products_price = '" . convertToFloat($price) . "' where products_id = '" . intval($item) . "' and products_price = '" . (float)($old_price[$item]) . "' limit 1");
-					if ($db->affectedRows() > 0) {
+					if ($db->affectedRows() == 1) {
 						$updated_count_price++;
 					}
 				}
@@ -67,9 +69,9 @@
 		}
 	}
 
-	$sort = (isset($_GET['sort']) ? $_GET['sort'] : '0');
+
 	$order_by = " ";
-	switch ($_GET['sort']) {
+	switch ($sort) {
 		case (0):
 			$order_by = " ORDER BY p.products_sort_order, pd.products_name";
 			break;
@@ -92,7 +94,7 @@
 			$order_by = " ORDER BY p.products_price_sorter DESC, pd.products_name";
 			break;
 	}
-	$active = (isset($_GET['active']) ? $_GET['active'] : '0');
+
 	$a_field = '';
 	switch ($active) {
 		case '1':
@@ -203,7 +205,7 @@
 			<?php } ?>
 
             <div>
-				<?= zen_draw_form('selection', FILENAME_INVENTORY, 'cid=' . $cid, 'get', 'class="form-horizontal"'); ?>
+				<?= zen_draw_form('selection', FILENAME_INVENTORY, 'cid=' . $cid .'&cmd=' . FILENAME_INVENTORY, 'get', 'class="form-horizontal"'); ?>
 
 				<?= zen_draw_label(CATEGORY_SELECTOR, 'cid', 'class="col-sm-6 col-md-4 control-label"'); ?>
                 <div class="col-sm-6 col-md-8">
@@ -278,7 +280,7 @@
                                         <td class="text-center">
 
                                             <a href="<?= zen_href_link(FILENAME_INVENTORY,
-												'action=tg_stat' . '&pid=' . $prod_list->fields['products_id'] . $cid_params . '&sort=' . $_GET['sort'] . '&active=' . $_GET['active'],
+												'action=tg_stat' . '&pid=' . $prod_list->fields['products_id'] . $cid_params . '&sort=' . $sort . '&active=' . $active,
 												'SSL'); ?>">
 												<?= ($prod_list->fields['products_status']
 													? zen_image(DIR_WS_IMAGES . 'icon_green_on.gif',
