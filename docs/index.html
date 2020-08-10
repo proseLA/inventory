@@ -89,11 +89,13 @@
 
         <H2>How to Install</H2>
 
-        <li>for v157 installs, just copy the admin folder to your YOUR_ADMIN folder.  the directory structure should match.
+        <li>for v157 installs, just copy the InvUpdator directory from the zc_plugins to your store zc_plugins directory.  Go to Admin -> Modules -> Plugin Manager; select Inventory Updator and Install.
         </li>
-        <li>for v156 installs, do the v157 install, and the then go into the for_v156 directory and copy the 1 file there to your admin.  again the directory structure should match.
+        <li>The Inventory menu option is now on the tools menu.</li>
+        <li>for v156 installs, copy the contents of the admin directory within the for_v156 to your YOUR_ADMIN directory.  the directory structure should match.
         </li>
-        <li>If you are upgrading from a previous version, you can just copy the files on top of the previous files.</li>
+        <li>If you are upgrading to the new zc_plugin v157 version, you need to delete the old versions of the files.  You can manually do this; or within this file: zc_plugins/InvUpdator/1.2.3/Installer/ScriptedInstaller.php, on line 12 remove the 2 slashes, and the plugin installer should do it for you.  See:
+        <pre>$this->removePrepluginVersion();</pre></li>
         <li>If you need help with FTPing the files up to your server, or an FTP client, go to the zen-cart forum.</li>
     </div>
 </section>
@@ -104,6 +106,8 @@
 
         <li>There are NO core zen-cart files modified.
         </li>
+        <li>Now makes use of the zc v157 plugin installer!  What could be easier?</li>
+        <li>With the plugin installer on v157, the inventory page is now on the tools menu.</li>
         <li>There are no additional fields added to any zen-cart tables</li>
         <li>The extra file for v156 installs is NOT the same as the v157 available on github.  There is a slight difference due to changes between the 2 versions of ZC.</li>
         <li>Update multiple items inventory quantity and base price fields within a category from a single page.</li>
@@ -116,8 +120,8 @@
         <li>Again, you will only see products down 1 level; to go down further, select a further sub-category.</li>
         <li>When at the top of the category list you will see all products, irrespective of the number of category levels you have.</li>
         <li>If there is a demand perhaps i will add the ability to search and then you can update inventory quantities of the items from your search results.</li>
-        <li>This new page is available at www.yoursite.com/YOUR_ADMIN/inventory.php.</li>
-        <li>To add this module as an admin menu item, go to your Admin -> Admins-> Admin Page Registration.
+        <li>This new page is available on the TOOLS menu or at www.yoursite.com/YOUR_ADMIN/index.php?cmd=inventory</li>
+        <li>On v156, to add this module as an admin menu item, go to your Admin -> Admins-> Admin Page Registration.
         <ul>
             <li>Page Key -> adminInventory</li>
             <li>Page Name -> BOX_ADMIN_INVENTORY</li>
