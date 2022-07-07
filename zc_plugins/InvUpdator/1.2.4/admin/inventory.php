@@ -7,7 +7,7 @@
         released under GPU
         https://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
 
-        06/2020  project: inventory v1.2.3 file: inventory.php
+        07/2022  project: inventory v1.2.4 file: inventory.php
     */
 
     require('includes/application_top.php');
