@@ -316,19 +316,18 @@
                                 }
                                 ?>
                             </table>
+                        <div>
+      <span class="floatButton text-right">
+    	<input type="reset" value="reset" class="btn btn-danger"/>
+    	<input type="submit" name="update_" value="<?= BUTTON_UPDATE; ?>" class="btn btn-primary"/>
+      </span>
+                        </div>
                     </form>
                         <table class="table table-striped table-hover table-bordered bottom-pager-table">
                             <tr>
                                 <td class="text-right"><?= $pager; ?></td>
                             </tr>
                         </table>
-                            <div>
-      <span class="floatButton text-right">
-    	<input type="reset" value="reset" class="btn btn-danger"/>
-    	<input type="submit" name="update_" value="<?= BUTTON_UPDATE; ?>" class="btn btn-primary"/>
-      </span>
-                            </div>
-
                     </div>
 
                 </div>
