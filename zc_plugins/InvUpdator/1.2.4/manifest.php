@@ -1,6 +1,6 @@
 <?php
 return [
-    'pluginVersion' => '1.2.4',
+    'pluginVersion' => '1.2.5',
     'pluginName' => 'Inventory Updator',
     'pluginDescription' => 'Update Inventory and Prices all in 1 Place',
     'pluginAuthor' => 'pRoseLA aka carlwhat',

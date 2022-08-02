@@ -2,12 +2,12 @@
     /*  portions copyright by... zen-cart.com
 
         developed and brought to you by proseLA
-        https://rossroberts.com
+        https://mxworks.cc
 
         released under GPU
         https://www.zen-cart.com/license/2_0.txt GNU Public License V2.0
 
-        07/2022  project: inventory v1.2.4 file: inventory.php
+        07/2022  project: inventory v1.2.5 file: inventory.php
     */
 
     require('includes/application_top.php');
@@ -29,8 +29,11 @@
     if ($action == 'tg_stat' && isset($_GET['pid']) && is_numeric($_GET['pid'])) {
         $rs_stat = $db->Execute("select products_status from " . TABLE_PRODUCTS . " where products_id=" . intval($_GET['pid']) . " LIMIT 1");
         $db->Execute("update " . TABLE_PRODUCTS . " set products_status = '" . ($rs_stat->fields['products_status'] == '1' ? '0' : '1') . "' where products_id=" . intval($_GET['pid']) . " LIMIT 1");
-        zen_redirect(zen_href_link(FILENAME_INVENTORY, 'sort=' . $sort . '&active=' . $active . $cid_params,
-            'SSL'));
+        zen_redirect(zen_href_link(
+            FILENAME_INVENTORY,
+            'sort=' . $sort . '&active=' . $active . $cid_params,
+            'SSL'
+        ));
     }
 
     $update_qty = 0;
@@ -78,21 +81,21 @@
         case (1):
             $order_by = " ORDER BY pd.products_name";
             break;
-        case (2);
-            $order_by = " ORDER BY p.products_model";
-            break;
-        case (3);
-            $order_by = " ORDER BY p.products_quantity, pd.products_name";
-            break;
-        case (4);
-            $order_by = " ORDER BY p.products_quantity DESC, pd.products_name";
-            break;
-        case (5);
-            $order_by = " ORDER BY p.products_price_sorter, pd.products_name";
-            break;
-        case (6);
-            $order_by = " ORDER BY p.products_price_sorter DESC, pd.products_name";
-            break;
+        case (2):
+        $order_by = " ORDER BY p.products_model";
+        break;
+        case (3):
+        $order_by = " ORDER BY p.products_quantity, pd.products_name";
+        break;
+        case (4):
+        $order_by = " ORDER BY p.products_quantity DESC, pd.products_name";
+        break;
+        case (5):
+        $order_by = " ORDER BY p.products_price_sorter, pd.products_name";
+        break;
+        case (6):
+        $order_by = " ORDER BY p.products_price_sorter DESC, pd.products_name";
+        break;
     }
 
     $a_field = '';
@@ -147,11 +150,20 @@
         }
     }
 
-    $pager = $products_page->display_count($query_num_rows, MAX_DISPLAY_RESULTS_CATEGORIES, $pageNo,
-        TEXT_DISPLAY_NUMBER_OF_PRODUCTS);
+    $pager = $products_page->display_count(
+        $query_num_rows,
+        MAX_DISPLAY_RESULTS_CATEGORIES,
+        $pageNo,
+        TEXT_DISPLAY_NUMBER_OF_PRODUCTS
+    );
     $pager .= '&nbsp;-&nbsp;';
-    $pager .= $products_page->display_links($query_num_rows, MAX_DISPLAY_RESULTS_CATEGORIES, MAX_DISPLAY_PAGE_LINKS, $pageNo,
-        $query_string);
+    $pager .= $products_page->display_links(
+        $query_num_rows,
+        MAX_DISPLAY_RESULTS_CATEGORIES,
+        MAX_DISPLAY_PAGE_LINKS,
+        $pageNo,
+        $query_string
+    );
 
     $categories_products_sort_order_array = [
         ['id' => '0', 'text' => TEXT_SORT_PRODUCTS_SORT_ORDER_PRODUCTS_NAME],
@@ -162,7 +174,7 @@
         ['id' => '5', 'text' => TEXT_SORT_PRODUCTS_PRICE],
         ['id' => '6', 'text' => TEXT_SORT_PRODUCTS_PRICE_DESC],
     ];
-?>
+    ?>
     <!doctype html>
     <html <?= HTML_PARAMS; ?>>
     <head>
@@ -179,11 +191,12 @@
         <div class="col-md-11 alert-box alert alert-info">
             <h3><?= INVENTORY_PAGE; ?></h3>
             <?php
-                $parent_name = zen_get_category_name($cid, (int)$_SESSION['languages_id']);
-                if ($cid > 0) {
-                    ?>
+                    $parent_name = zen_get_category_name($cid, (int)$_SESSION['languages_id']);
+    if ($cid > 0) {
+        ?>
                     <h3><?= $parent_name; ?></h3>
-                <?php } ?>
+                <?php
+    } ?>
         </div>
         <div class="col-md-11">
             <?php if (isset($update_qty) && $update_qty > 0) { ?>
@@ -210,14 +223,21 @@
                 <?= zen_draw_label(CATEGORY_SELECTOR, 'cid', 'class="col-sm-6 col-md-4 control-label"'); ?>
                 <div class="col-sm-6 col-md-8">
                     <?php
-                        echo zen_draw_pull_down_menu('cid', zen_get_category_tree(), $cid, 'onChange="this.form.submit()" class="form-control" id="cid"');
-                    ?>
+            echo zen_draw_pull_down_menu('cid', zen_get_category_tree(), $cid, 'onChange="this.form.submit()" class="form-control" id="cid"');
+    ?>
                 </div>
-                <?= zen_draw_label(TEXT_CATEGORIES_PRODUCTS_SORT_ORDER_INFO, 'sort',
-                    'class="col-sm-6 col-md-4 control-label"'); ?>
+                <?= zen_draw_label(
+        TEXT_CATEGORIES_PRODUCTS_SORT_ORDER_INFO,
+        'sort',
+        'class="col-sm-6 col-md-4 control-label"'
+    ); ?>
                 <div class="col-sm-6 col-md-8">
-                    <?= zen_draw_pull_down_menu('sort', $categories_products_sort_order_array, $sort,
-                        'onchange="this.form.submit();" class="form-control" id="sort"'); ?>
+                    <?= zen_draw_pull_down_menu(
+                        'sort',
+                        $categories_products_sort_order_array,
+                        $sort,
+                        'onchange="this.form.submit();" class="form-control" id="sort"'
+                    ); ?>
                 </div>
                 <?= zen_draw_label(ACTIVE_STATUS, 'active', 'class="col-sm-6 col-md-4 control-label"'); ?>
                 <div class="col-sm-6 col-md-8">
@@ -239,7 +259,7 @@
                             <td class="text-right"><?= $pager; ?></td>
                         </tr>
                         </table>
-                        <?= zen_draw_form('inventory_update',  FILENAME_INVENTORY, 'sort=' . $sort . '&active=' . $active . '&page=' . ($_GET['page'] ?? 1) . $cid_params); ?>
+                        <?= zen_draw_form('inventory_update', FILENAME_INVENTORY, 'sort=' . $sort . '&active=' . $active . '&page=' . ($_GET['page'] ?? 1) . $cid_params); ?>
                             <table class="table table-striped table-hover table-bordered">
                                 <thead>
 
@@ -257,8 +277,10 @@
 
                                 <?php while ($prod_list && !$prod_list->EOF) {
                                     $type_handler = $zc_products->get_admin_handler($prod_list->fields['products_type']);
-                                    if (isset($bad_sku) && array_key_exists($prod_list->fields['products_id'],
-                                            $bad_sku)) {
+                                    if (isset($bad_sku) && array_key_exists(
+                                        $prod_list->fields['products_id'],
+                                        $bad_sku
+                                    )) {
                                         $color = ' bgcolor="red" ';
                                     } else {
                                         $color = '';
@@ -267,28 +289,37 @@
                                     <tr class="dataTableRow" onmouseover="rowOverEffect(this)"
                                         onmouseout="rowOutEffect(this)">
                                         <td <?= $color; ?> class="dataTableContent"
-                                                           onclick="document.location.href='<?= zen_href_link($type_handler,
-                                                               'page=1' . '&product_type=' . $prod_list->fields['products_type'] . '&pID=' . $prod_list->fields['products_id'] . '&action=new_product'); ?> '"><?= $prod_list->fields['products_id']; ?></td>
+                                                           onclick="document.location.href='<?= zen_href_link(
+                                        $type_handler,
+                                        'page=1' . '&product_type=' . $prod_list->fields['products_type'] . '&pID=' . $prod_list->fields['products_id'] . '&action=new_product'
+                                    ); ?> '"><?= $prod_list->fields['products_id']; ?></td>
                                         <td class="dataTableContent text-center">
                                             <?= $prod_list->fields['products_model']; ?>
                                         </td>
                                         <td class="dataTableContent"
-                                            onclick="document.location.href='<?= zen_href_link(FILENAME_PRODUCT,
-                                                'product_type=' . $prod_list->fields['products_type'] . '&pID=' . $prod_list->fields['products_id'] . '&cPath=' . $prod_list->fields['catId'] . '&action=new_product'); ?> '">
+                                            onclick="document.location.href='<?= zen_href_link(
+                                                                   FILENAME_PRODUCT,
+                                                                   'product_type=' . $prod_list->fields['products_type'] . '&pID=' . $prod_list->fields['products_id'] . '&cPath=' . $prod_list->fields['catId'] . '&action=new_product'
+                                                               ); ?> '">
                                             <?php
-                                                echo zen_get_products_name($prod_list->fields['products_id']);
-                                            ?>
+                                                echo zen_get_products_name($prod_list->fields['products_id']); ?>
                                         </td>
                                         <td class="text-center">
 
-                                            <a href="<?= zen_href_link(FILENAME_INVENTORY,
-                                                'action=tg_stat' . '&pid=' . $prod_list->fields['products_id'] . $cid_params . '&sort=' . $sort . '&active=' . $active,
-                                                'SSL'); ?>">
+                                            <a href="<?= zen_href_link(
+                                                    FILENAME_INVENTORY,
+                                                    'action=tg_stat' . '&pid=' . $prod_list->fields['products_id'] . $cid_params . '&sort=' . $sort . '&active=' . $active,
+                                                    'SSL'
+                                                ); ?>">
                                                 <?= ($prod_list->fields['products_status']
-                                                    ? zen_image(DIR_WS_IMAGES . 'icon_green_on.gif',
-                                                        IMAGE_ICON_STATUS_ON)
-                                                    : zen_image(DIR_WS_IMAGES . 'icon_red_on.gif',
-                                                        IMAGE_ICON_STATUS_OFF)) ?>
+                                                    ? zen_image(
+                                                        DIR_WS_IMAGES . 'icon_green_on.gif',
+                                                        IMAGE_ICON_STATUS_ON
+                                                    )
+                                                    : zen_image(
+                                                        DIR_WS_IMAGES . 'icon_red_on.gif',
+                                                        IMAGE_ICON_STATUS_OFF
+                                                    )) ?>
                                             </a>
                                         </td>
                                         <td class="dataTableContent text-right">
@@ -314,7 +345,7 @@
 
                                     <?php $prod_list->MoveNext();
                                 }
-                                ?>
+    ?>
                             </table>
                         <div>
       <span class="floatButton text-right">
